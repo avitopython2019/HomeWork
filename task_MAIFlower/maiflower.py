@@ -66,8 +66,14 @@ def cash(ttl):
             ret_val = func(*args, **kwargs)
             in_out_dict.update({"ret_val":ret_val})
             cash_dict[func.__name__] =  in_out_dict
-            for k in cash_dict:
+
+            # if cash_dict[k]["ttl"] == 0:
+            temp_cash = cash_dict.copy()
+            for k in temp_cash:
                 if k != func.__name__:
+                    if cash_dict[k]["ttl"] == 0:
+                        del cash_dict[k]
+                        continue
                     cash_dict[k]["ttl"] -=1
             return ret_val
         return wrapper
@@ -83,13 +89,13 @@ def time_exec(func : callable):
         return ret_val
     return wrapper
 
-def run_server( addr : str, port : int, *handlers):
+def run_server( addr : str, port : int, cfg, *handlers):
         # if(self.is_valid_ipv4_address(addr) and self.is_valid_port(port) ):
         for func in handlers:
-            num_args = len(func)
-            func_obj, args = func
-            print(func, num_args)
-            # func[0](func[1])
+            if(len(func) == 3):
+                func[0](*func[1], **func[2])
+            else:
+                func[0](*func[1])
 
 # class MaiFlower:
 #     """Maiflower is a fake server"""
