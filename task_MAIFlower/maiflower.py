@@ -1,43 +1,36 @@
 import functools
 import socket
 import time
+from jsonschema import validate, ValidationError
+import validators
 
-# def logger(**options):
-#     def decorator_inner(func: callable):
-#         def wrapper(*args, **kwargs):
-#             # print(args, kwargs, options)
-#             # print("console" in options)
-#             if(('console' in options) == True):
-#                 # print("CONSOLE")
-#                 print(func.__name__, *args, **kwargs)
-#             if("file" in options == True):
-#                 file = open("log.txt", 'a')
-#                 file.write("".join(func.__name__, *args, **kwargs))
-#                 file.close()
-#             func(*args, **kwargs)
-#         return wrapper
-#     return decorator_inner
-
-# def logger(func: callable):
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         if('console' in kwargs):
-#             print(func.__name__, *args)
-#         if("file" in kwargs == True):
-#             file = open("log.txt", 'a')
-#             file.write("".join(func.__name__, *args, **kwargs))
-#             file.close()
-#         func(*args)
-#     return wrapper
+def valid(validate_schema):
+    """
+    Принимает схему валидации ответа запроса
+    Возвращает сообщение об ошибке, если валидация не прошла
+    """
+    def decorator_inner(func: callable):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            ret_val = func(*args, **kwargs)
+            try:
+                validate( ret_val, schema=validate_schema)
+            except ValidationError:
+                print("ValidationError! Response is invalid:\n"
+                    f"\tSchema: {validate_schema}\n" f"\tResponse: {ret_val}" )
+                return "Validation if invalid"
+            print("Validation success!")
+            return ret_val
+        return wrapper
+    return decorator_inner
 
 def logger(func: callable):
+    """
+    Декоратор для логгирования входных и выходных параметров функции.
+    Пока только в консоль
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # if("file" in args):
-        #     file = open("log.txt", 'a')
-        #     file.write("".join(func.__name__, *args, **kwargs))
-        #     file.close()
-        # func_name = func.__name__
         ret_val =  func(*args, **kwargs)
         print("Call: ",func.__name__)
         print("\targs: ", *args)
@@ -46,14 +39,18 @@ def logger(func: callable):
         return ret_val
     return wrapper
 
-cash_dict = {}
+cash_dict = {} # словарь для хранения cash
 def cash(ttl):
     """
     Cash decorator.
-    Repeat args of function and return value in cash_dict.
+    Write args of function and return value in cash_dict.
     ttl - time to life, determines how long it takes
     to remove values from cash. one case - one unit of time.
-    If ttl == 0 - it mean ttl = infinity
+    If ttl == -1 - it mean ttl = infinity
+    Кэш декоратор.
+    Записывает аргументы функции и возвращаемое значение в cash_dict.
+    ttl - время жизни. Определяет как долго хранится кэш данной функции.
+    Если ttl == -1 - то данный кэш не стерается.
     """
     def decorator_inner(func: callable):
         @functools.wraps(func)
@@ -65,14 +62,15 @@ def cash(ttl):
                         if args == cash_dict[k]["args"] and kwargs == cash_dict[k]["kwargs"]:
                             return cash_dict[k]["ret_val"]
             ret_val = func(*args, **kwargs)
-            in_out_dict.update({"ret_val":ret_val})
-            cash_dict[func.__name__] =  in_out_dict
-
-            # if cash_dict[k]["ttl"] == 0:
+            if ret_val != None:
+                in_out_dict.update({"ret_val":ret_val})
+                cash_dict[func.__name__] =  in_out_dict
             temp_cash = cash_dict.copy()
             for k in temp_cash:
                 if k != func.__name__:
-                    if cash_dict[k]["ttl"] == 0:
+                    if cash_dict[k]["ttl"] == -1:
+                        continue
+                    elif cash_dict[k]["ttl"] == 0:
                         del cash_dict[k]
                         continue
                     cash_dict[k]["ttl"] -=1
@@ -81,45 +79,47 @@ def cash(ttl):
     return decorator_inner
 
 def time_exec(func : callable):
+    """
+    Декоратор засекающий время работы функции
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         start_time = time.clock()
         ret_val = func(*args, **kwargs)
         distance_time = time.clock() - start_time
-        print(f'Execution time {round(distance_time*1000000, 4)} usec')
+        print(f'Execution time {round(distance_time*1000000, 4)} usec\n')
         return ret_val
     return wrapper
 
-def run_server( addr : str, port : int, cfg, *handlers):
-        # if(self.is_valid_ipv4_address(addr) and self.is_valid_port(port) ):
+def is_valid_address(address):
+    """
+    Проверка адреса на валидность
+    """
+    if not validators.url(address):
+        return False
+    return True
+
+def is_valid_port(port: int):
+    """
+    Проверка порта на валидность
+    """
+    if 1023 < port < 65536:
+        return True
+    return False
+
+def run_server( addr : str, port : int, *handlers):
+    """
+    Принимает адрес и порт, проверяет их на валидность
+    остальные аргументы функции - кортежи, состоящие из трех элементов:
+        (объект_обработчик, (кортеж неименованных переменных), {словарь именнованных})
+    аргумент для вызова обработчика без параментров будет выглядеть так : 
+            (hangler,(), {})
+    """
+    if(is_valid_address(addr) and is_valid_port(port) ):
         for func in handlers:
             if len(func) == 3:
                 func[0](*func[1], **func[2])
             else:
-                print(f"Error: func - {func[0].__name__} doesn't have name or unname args")
-# class MaiFlower:
-#     """Maiflower is a fake server"""
-#     cash_dict = {}
-#     @logger
-#     def is_valid_ipv4_address(self, address):
-#         try:
-#             socket.inet_pton(socket.AF_INET, address)
-#         except AttributeError:  # no inet_pton here, sorry
-#             try:
-#                 socket.inet_aton(address)
-#             except socket.error:
-#                 return False
-#             return address.count('.') == 3
-#         except socket.error:  # not a valid address
-#             return False
-#         return True
-#     @logger
-#     def is_valid_port(self, port: int):
-#       if 1023 < port < 65536:
-#         return True
-#       return False
-
-#     def run_server(self, addr : str, port : int, *handlers, **kwargs):
-#         if(self.is_valid_ipv4_address(addr) and self.is_valid_port(port) ):
-#             for func in handlers:
-#                 func[0](func[1])
+                print(f"Error: func - {func[0].__name__} doesn't have name or unname args\n")
+    else:
+        print("Error! Addres or port are invalid!\n")

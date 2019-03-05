@@ -1,34 +1,35 @@
 import maiflower
-from maiflower import logger, cash, time_exec
+from maiflower import logger, cash, time_exec, valid
 
 #Имитация базы данных студентов
 student_db = dict(
     Misha =dict(
         id = 0,
-        form="student",
-        organization="MAI"),
+        form="master",
+        university="MAI"),
     Anton = dict(
         id = 1,
-        form="student",
-        organization="MAI"),
+        form="master",
+        university="MAI"),
     Andrew = dict(
         id = 2,
-        form="student",
-        organization="MAI"),
+        form="bachelor",
+        university="MAI"),
     John = dict(
-        id = 3,
-        form="student",
-        organization="MIT",
+        id = "sd",
+        form="bachelor",
+        university="MIT",
         country="USA"))
 
-# # @logger
-# def say_hello(name):
-#     print("Hello {}".format(name))
+schema_student = {
+    "type" : "object", 
+    "properties": {
+        "id" : {"type":"number"},
+        "form" : {"type":"string"},
+        "university" : {"type":"string"}
+    }
+}
 
-# # @logger
-# @cash
-# def make_json(cash_dict: dict, **kwargs):
-#     return kwargs
 @time_exec
 @cash(2)
 @logger
@@ -53,19 +54,22 @@ def div(a, b):
 @time_exec
 @cash(2)
 @logger
-def get_student_data(name: str):
-    # print(name)
-    print (name, student_db[name])
+@valid(schema_student)
+def get_student(name: str):
     return student_db[name]
 
-# print(student_db)
 
+maiflower.run_server("http://example.com", 30001,
+    (get_student, (),{"name":"Misha"}),
+    (get_student, (),{"name":"John"}), # John - имеет неправильный id в бд, он не пройдёт валидацию
+    )
 
-cfg = {"mul" :"/mul" , "sum" : "/sum", "sub" : "/sub", "div" : "/div"}
+print(f"Cash:\t {maiflower.cash_dict}\n") # cмотрим что лежит в кэш
 
-maiflower.run_server("127.0.0.1", 8080, cfg, (sum, (4, 5)), (mul, (3, 2)), (get_student_data, (),{"name":"Misha"}))
-print(maiflower.cash_dict)
-# json_val = make_json(my_server.cash_dict,  name="Miklail", university = "MAI")
-# mul(5,6)
-print(maiflower.cash_dict)
-# print(maiflower.cash_dict)
+maiflower.run_server("http://example.com", 30001,
+    (sub, (4, 1), {}),
+    (mul, (3, 2)), # Неправильный аргумент для передачи обработчика, см. docstring run_server
+    (div, (6,2), {}),
+    (sum, (5,4), {})
+    )
+print(f"Cash:\t {maiflower.cash_dict}\n") # cмотрим что лежит в кэш
