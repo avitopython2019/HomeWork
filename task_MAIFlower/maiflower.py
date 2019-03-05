@@ -55,7 +55,8 @@ def cash(ttl):
     to remove values from cash. one case - one unit of time.
     If ttl == 0 - it mean ttl = infinity
     """
-    def decorator_inner(func):
+    def decorator_inner(func: callable):
+        @functools.wraps(func)
         def wrapper( *args, **kwargs):
             in_out_dict = dict(ttl=ttl ,args=args, kwargs=kwargs)
             if len(cash_dict) != 0:
@@ -92,11 +93,10 @@ def time_exec(func : callable):
 def run_server( addr : str, port : int, cfg, *handlers):
         # if(self.is_valid_ipv4_address(addr) and self.is_valid_port(port) ):
         for func in handlers:
-            if(len(func) == 3):
+            if len(func) == 3:
                 func[0](*func[1], **func[2])
             else:
-                func[0](*func[1])
-
+                print(f"Error: func - {func[0].__name__} doesn't have name or unname args")
 # class MaiFlower:
 #     """Maiflower is a fake server"""
 #     cash_dict = {}
