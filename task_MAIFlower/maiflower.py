@@ -1,8 +1,8 @@
 import functools
-import socket
 import time
 from jsonschema import validate, ValidationError
 import validators
+
 
 def valid(validate_schema):
     """
@@ -14,15 +14,17 @@ def valid(validate_schema):
         def wrapper(*args, **kwargs):
             ret_val = func(*args, **kwargs)
             try:
-                validate( ret_val, schema=validate_schema)
+                validate(ret_val, schema=validate_schema)
             except ValidationError:
                 print("ValidationError! Response is invalid:\n"
-                    f"\tSchema: {validate_schema}\n" f"\tResponse: {ret_val}" )
+                    f"\tSchema: {validate_schema}\n"
+                    f"\tResponse: {ret_val}")
                 return "Validation if invalid"
             print("Validation success!")
             return ret_val
         return wrapper
     return decorator_inner
+
 
 def logger(func: callable):
     """
@@ -31,15 +33,18 @@ def logger(func: callable):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        ret_val =  func(*args, **kwargs)
-        print("Call: ",func.__name__)
+        ret_val = func(*args, **kwargs)
+        print("Call: ", func.__name__)
         print("\targs: ", *args)
         print("\tkwargs: ", kwargs)
         print("\treturn: ", ret_val)
         return ret_val
     return wrapper
 
-cash_dict = {} # словарь для хранения cash
+
+cash_dict = {}  # словарь для хранения cash
+
+
 def cash(ttl):
     """
     Cash decorator.
@@ -54,8 +59,8 @@ def cash(ttl):
     """
     def decorator_inner(func: callable):
         @functools.wraps(func)
-        def wrapper( *args, **kwargs):
-            in_out_dict = dict(ttl=ttl ,args=args, kwargs=kwargs)
+        def wrapper(*args, **kwargs):
+            in_out_dict = dict(ttl=ttl, args=args, kwargs=kwargs)
             if len(cash_dict) != 0:
                 for k in cash_dict:
                     if k == func.__name__:
@@ -73,10 +78,11 @@ def cash(ttl):
                     elif cash_dict[k]["ttl"] == 0:
                         del cash_dict[k]
                         continue
-                    cash_dict[k]["ttl"] -=1
+                    cash_dict[k]["ttl"] -= 1
             return ret_val
         return wrapper
     return decorator_inner
+
 
 def time_exec(func : callable):
     """
@@ -91,6 +97,7 @@ def time_exec(func : callable):
         return ret_val
     return wrapper
 
+
 def is_valid_address(address):
     """
     Проверка адреса на валидность
@@ -99,6 +106,7 @@ def is_valid_address(address):
         return False
     return True
 
+
 def is_valid_port(port: int):
     """
     Проверка порта на валидность
@@ -106,6 +114,7 @@ def is_valid_port(port: int):
     if 1023 < port < 65536:
         return True
     return False
+
 
 def run_server( addr : str, port : int, *handlers):
     """
