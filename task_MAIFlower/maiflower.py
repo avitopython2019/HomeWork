@@ -64,7 +64,8 @@ def cash(ttl):
             if len(cash_dict) != 0:
                 for k in cash_dict:
                     if k == func.__name__:
-                        if args == cash_dict[k]["args"] and kwargs == cash_dict[k]["kwargs"]:
+                        if args == cash_dict[k]["args"] and\
+                         kwargs == cash_dict[k]["kwargs"]:
                             return cash_dict[k]["ret_val"]
             ret_val = func(*args, **kwargs)
             if ret_val != None:

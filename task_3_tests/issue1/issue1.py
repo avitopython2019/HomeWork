@@ -1,13 +1,13 @@
 """
 >>> from morse import *
 
->>> encode("AVITO")
+>>> encode('AVITO')
 '.- ...- .. - ---'
 
->>> encode("SOS")
+>>> encode('SOS')
 '... --- ...'
 
->>> encode("!")
+>>> encode('!')
 Traceback (most recent call last):
 ...
 KeyError: Symbol wasn't found in LETTER_TO_MORSE

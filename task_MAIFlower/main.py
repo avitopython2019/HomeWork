@@ -52,7 +52,7 @@ def div(a, b):
     return a / b
 
 @time_exec
-@cash(2)
+@cash(5)
 @logger
 @valid(schema_student)
 def get_student(name: str):
