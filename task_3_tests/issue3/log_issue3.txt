@@ -1,0 +1,10 @@
+test_exception (issue3.Test_One_Hot_Encoder) ... ok
+test_fit_transform_cities (issue3.Test_One_Hot_Encoder) ... ok
+test_hello_world_in_encode (issue3.Test_One_Hot_Encoder) ... ok
+test_input_empty_expected_empty_output (issue3.Test_One_Hot_Encoder) ... ok
+test_len_from_fit_transform (issue3.Test_One_Hot_Encoder) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
