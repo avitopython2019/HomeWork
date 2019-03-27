@@ -6,11 +6,11 @@
 
 ## Запускать и смотреть
 Запустили тесты:
-* python3 -m pytest main.py -v > log.txt # Записали результат работы тестов
-Посмотерели результат:
-* cat log.txt
-Запусти main для проверки вывод __repl__ жёлтым:
-* python3 main.py >> log.txt
-Посмотерели результат:
-* cat log.txt
+* * python3 -m pytest main.py -v > log.txt # Записали результат работы тестов
+* Посмотерели результат:
+* * cat log.txt
+* Запусти main для проверки вывод __repl__ жёлтым:
+* * python3 main.py >> log.txt
+* Посмотерели результат:
+* * cat log.txt
 
