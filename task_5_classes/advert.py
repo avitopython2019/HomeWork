@@ -1,9 +1,10 @@
-import json
 import keyword
+
 
 class ObjectFromJson:
     """
     Динамически создаёт атрибуты экземпляра класса из атрибутов JSON-объекта
+    На вход в конструторе ожидает JSON-объект
     """
     def __init__(self, json_dict: dict):
         for k, v in json_dict.items():
@@ -12,26 +13,29 @@ class ObjectFromJson:
             else:
                 self.__setattr__(k, v)
 
+
 class ColorizeMixin:
     """
     Миксин, который менять цвет вывода.
-    В конструкторе задётся цвет, по-умолчанию цвет - зелёный
+    В конструкторе задётся цвет, по-умолчанию цвет - жёлтый
     repr_color_text - цвет текста
     repr_bg_color - цвет фона текста
     repr_style_color - стиль текста
     Посмотреть коды можно тут http://ozzmaker.com/add-colour-to-text-in-python/
     """
-    repr_color_code = '\033[0;32;48m'
+    repr_color_code = '\033[0;33;48m'
     normal_color_code = '\033[0m'
-    def __init__(self,
-        repr_color_text = '32',
-        repr_bg_color = '48',
-        repr_style_color = '0'
-        ):
+
+    def __init__(
+            self,
+            repr_color_text='33',
+            repr_bg_color='48',
+            repr_style_color='0'
+            ):
         self.repr_color_code = ''.join([
             '\033[', repr_style_color,
             ';', repr_color_text,
-            ';', repr_bg_color, 'm',])
+            ';', repr_bg_color, 'm', ])
         self.normal_color_code = '\033[0m'
 
 
@@ -47,7 +51,7 @@ class Advert(ColorizeMixin):
         except AttributeError:
             self.price = 0
 
-        if self.json_obj.price < 0:
+        if self.price < 0:
             raise ValueError("Price must be >= 0")
         super().__init__()
 

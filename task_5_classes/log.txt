@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-4.3.0, py-1.8.0, pluggy-0.9.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/misha/development/learning/Python/Avito/HomeWork/task_5_classes, inifile:
+collecting ... collected 7 items
+
+main.py::test_corgi_class PASSED                                         [ 14%]
+main.py::test_iphone_location_address PASSED                             [ 28%]
+main.py::test_negative_price_exception_ValueError PASSED                 [ 42%]
+main.py::test_none_title_exception_AttributeError PASSED                 [ 57%]
+main.py::test_not_price PASSED                                           [ 71%]
+main.py::test_iphone_repr PASSED                                         [ 85%]
+main.py::test_iphone_metro_stations_list PASSED                          [100%]
+
+=========================== 7 passed in 0.01 seconds ===========================
+[0;33;48mВельш-корги | 1000 ₽[0m
